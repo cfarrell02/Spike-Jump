@@ -17,11 +17,11 @@ using namespace::sf;
 class Block {
 private:
     Sprite m_Sprite;
-    Vector2<int> m_Coords, m_Size;
+    Vector2i m_Coords, m_Size;
 public:
     const bool m_IsWalkable;
-    Block(Texture& texture, Vector2<int> coords,Vector2<int> size, bool isWalkable = true);
-    Vector2<int> getCoords() , getSize();
+    Block(Texture& texture, Vector2i coords,Vector2i size, bool isWalkable = true);
+    Vector2i getCoords() , getSize();
     Sprite getSprite();
 };
 

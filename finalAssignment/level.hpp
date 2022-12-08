@@ -19,14 +19,13 @@ using namespace std;
 
 class Level {
 private:
-    Vector2<int> m_levelDimensions;
-    map<Vector2<int>,Block> m_Map;
+    Vector2i m_levelDimensions;
+    map<Vector2i,Block> m_Map;
 public:
-    Level(map<Vector2<int>,Block> map);
-    Block getBlock(Vector2<int> coords);
-    bool isValidLocation(Vector2<int> coords);
-    
-    
+    Level(map<Vector2i,Block> blocks);
+    Block getBlock(Vector2i coords);
+    map<Vector2i,Block>* getBlocks();
+    bool isValidLocation(Vector2i coords);
 };
 
 #endif /* level_hpp */
