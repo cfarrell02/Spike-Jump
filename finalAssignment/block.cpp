@@ -8,20 +8,18 @@
 
 #include "block.hpp"
 
-Block::Block(Texture& texture,Vector2i coords,Vector2i size, bool isWalkable):
-m_IsWalkable(isWalkable), m_Coords(coords), m_Size(size), Id((int) time(0))
+Block::Block(Texture& texture,IntRect pos, bool isWalkable):
+m_IsWalkable(isWalkable), m_Position(pos)
 {
     m_Sprite.setTexture(texture);
     //m_Sprite.setOrigin(size.x/2, size.y/2);
-    m_Sprite.setPosition(m_Coords.x, m_Coords.y);
+    m_Sprite.setPosition(m_Position.left, m_Position.top);
 }
 
-Vector2i Block::getCoords(){
-    return m_Coords;
-}
 
-Vector2i Block::getSize(){
-    return m_Size;
+
+IntRect Block::getPosition(){
+    return m_Position;
 }
 
 Sprite Block::getSprite(){

@@ -16,7 +16,7 @@ TextureHolder textureHolder;
 int main(int, char const**)
 {
     // Create the main window
-    sf::RenderWindow window(sf::VideoMode(1000, 800), "SFML window");
+    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
     Level* level;
     // Start the game loop
     populateLevels(level);
@@ -73,7 +73,7 @@ void populateLevels(Level*& level){
             
             if(levelData[x][y] == 0) continue;
             try{
-                Block block(TextureHolder::GetTexture("/Users/cianfarrell/Documents/GitHub/finalAssignment/Resources/Images/Block.png"), Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),Vector2i(BLOCK_WIDTH,BLOCK_WIDTH),true);
+                Block block(TextureHolder::GetTexture("/Users/cianfarrell/Documents/GitHub/finalAssignment/Resources/Images/Block.png"),IntRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
 
             map[x].push_back(block);
             } catch(exception e){

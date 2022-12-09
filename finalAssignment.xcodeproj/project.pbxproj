@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		50343A6B2943F35900BF8AD3 /* character.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50343A692943F35900BF8AD3 /* character.cpp */; };
 		50625CF62940BC5B00AC5F5C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50625CF52940BC5B00AC5F5C /* main.cpp */; };
 		50625D0A2940EDAB00AC5F5C /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 50625D092940EDAB00AC5F5C /* Resources */; };
 		50625D0D2940EDBE00AC5F5C /* block.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50625D0B2940EDBE00AC5F5C /* block.cpp */; };
@@ -15,6 +16,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		50343A692943F35900BF8AD3 /* character.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = character.cpp; sourceTree = "<group>"; };
+		50343A6A2943F35900BF8AD3 /* character.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = character.hpp; sourceTree = "<group>"; };
 		50625CED2940BC5B00AC5F5C /* finalAssignment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = finalAssignment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50625CF52940BC5B00AC5F5C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		50625D052940BCA600AC5F5C /* finalAssignment.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = finalAssignment.entitlements; sourceTree = "<group>"; };
@@ -66,6 +69,8 @@
 				50625D0C2940EDBE00AC5F5C /* block.hpp */,
 				50625D11294134D700AC5F5C /* level.cpp */,
 				50625D12294134D700AC5F5C /* level.hpp */,
+				50343A692943F35900BF8AD3 /* character.cpp */,
+				50343A6A2943F35900BF8AD3 /* character.hpp */,
 			);
 			path = finalAssignment;
 			sourceTree = "<group>";
@@ -161,6 +166,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50343A6B2943F35900BF8AD3 /* character.cpp in Sources */,
 				50625CF62940BC5B00AC5F5C /* main.cpp in Sources */,
 				50625D1029412C0500AC5F5C /* textureHolder.cpp in Sources */,
 				50625D13294134D700AC5F5C /* level.cpp in Sources */,

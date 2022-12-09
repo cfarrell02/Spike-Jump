@@ -17,13 +17,12 @@ using namespace::sf;
 class Block {
 private:
     Sprite m_Sprite;
-    Vector2i m_Coords, m_Size;
+    IntRect m_Position;
     
 public:
     const bool m_IsWalkable;
-    const int Id;
-    Block(Texture& texture, Vector2i coords,Vector2i size, bool isWalkable = true);
-    Vector2i getCoords() , getSize();
+    Block(Texture& texture, IntRect pos, bool isWalkable = true);
+    IntRect getPosition();
     Sprite getSprite();
 };
 
