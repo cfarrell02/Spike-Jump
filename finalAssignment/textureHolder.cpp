@@ -1,6 +1,4 @@
-//
-//  textureHolder.cpp
-//  ZombieArena
+
 //
 //  Created by Cian Farrell on 22/11/2022.
 //

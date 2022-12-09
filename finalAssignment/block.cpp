@@ -9,7 +9,7 @@
 #include "block.hpp"
 
 Block::Block(Texture& texture,Vector2i coords,Vector2i size, bool isWalkable):
-m_IsWalkable(isWalkable), m_Coords(coords), m_Size(size)
+m_IsWalkable(isWalkable), m_Coords(coords), m_Size(size), Id((int) time(0))
 {
     m_Sprite.setTexture(texture);
     //m_Sprite.setOrigin(size.x/2, size.y/2);

@@ -18,8 +18,10 @@ class Block {
 private:
     Sprite m_Sprite;
     Vector2i m_Coords, m_Size;
+    
 public:
     const bool m_IsWalkable;
+    const int Id;
     Block(Texture& texture, Vector2i coords,Vector2i size, bool isWalkable = true);
     Vector2i getCoords() , getSize();
     Sprite getSprite();

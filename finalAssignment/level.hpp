@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "block.hpp"
 #include <SFML/Graphics.hpp>
-#include <map>
+#include <vector>
 
 using namespace sf;
 using namespace std;
@@ -20,11 +20,11 @@ using namespace std;
 class Level {
 private:
     Vector2i m_levelDimensions;
-    map<Vector2i,Block> m_Map;
+    vector<vector<Block>>* m_Map;
 public:
-    Level(map<Vector2i,Block> blocks);
+    Level(vector<vector<Block>> blocks);
     Block getBlock(Vector2i coords);
-    map<Vector2i,Block>* getBlocks();
+    vector<vector<Block>>* getBlocks();
     bool isValidLocation(Vector2i coords);
 };
 

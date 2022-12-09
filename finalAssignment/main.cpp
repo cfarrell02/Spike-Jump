@@ -1,18 +1,4 @@
 
-//
-// Disclaimer:
-// ----------
-//
-// This code will work only if you selected window, graphics and audio.
-//
-// Note that the "Run Script" build phase will copy the required frameworks
-// or dylibs to your application bundle so you can execute it on any OS X
-// computer.
-//
-// Your resource files (images, sounds, fonts, ...) are also copied to your
-// application bundle. To get the path to these resources, use the helper
-// function `resourcePath()` from ResourcePath.hpp
-//
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -20,22 +6,23 @@
 #include "level.hpp"
 #include "textureHolder.hpp"
 
-// Here is a small helper for you! Have a look.
+
 using namespace sf;
 
-const int BLOCK_WIDTH = 64;
-
-void populateLevels(Level* level);
-
+const int BLOCK_WIDTH = 64; // Pixels
+const int levelWidth = 50, levelHeight = 50; // In Block Units
+void populateLevels(Level*& level);
+TextureHolder textureHolder;
 int main(int, char const**)
 {
     // Create the main window
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
-     Level* level;
+    sf::RenderWindow window(sf::VideoMode(1000, 800), "SFML window");
+    Level* level;
     // Start the game loop
+    populateLevels(level);
     while (window.isOpen())
     {
-        populateLevels(level);
+        
         // Process events
         sf::Event event;
         while (window.pollEvent(event))
@@ -51,12 +38,20 @@ int main(int, char const**)
             }
         }
 
-        // Clear screen
-//        map<Vector2i,Block>::iterator iter;
-//        map<Vector2i,Block>* map = level->getBlocks();
-//        for(iter = map->begin() ; iter != map->end() ; ++ iter){
-//            window.draw(iter->second.getSprite());
-//        }
+        //Draw Sprites
+        try{
+        vector<vector<Block>>* blocks = level ->getBlocks();
+        for(int x = 0; x< blocks->size();++x){
+            for(int y = 0 ; y< blocks->at(x).size();++y){
+                window.draw((blocks->at(x)).at(y).getSprite());
+            }
+        }
+        }
+        catch(exception& e){
+            cerr<<e.what()<<endl;
+            cerr<<"Exiting...";
+            return -1;
+        }
 
 
         // Update the window
@@ -66,19 +61,25 @@ int main(int, char const**)
     return 0;
 }
 
-void populateLevels(Level* level){
-    const int levelWidth = 500, levelHeight = 500;
-    int levelData[levelWidth][levelHeight] = {{1,0,1,1,1,1,0,0,0,0},{1,0,0,1,1,1,1,1,0,0}};
-    cout<<"Hello";
-    map<Vector2i,Block> map;
-    for(int x = 0 ; x< levelWidth ;x+=BLOCK_WIDTH){
-        for(int y = 0; y< levelHeight ; y+=BLOCK_WIDTH){
-            std::cout<<levelData[x][y];
-            if(levelData[x][y] == 0) break;
-            Block block(TextureHolder::GetTexture("../Resources/Images/Block.png"), Vector2i(x,y),Vector2i(BLOCK_WIDTH,BLOCK_WIDTH),true);
-            map.insert(pair<Vector2i,Block>(Vector2i(x,y),block));
+void populateLevels(Level*& level){
+
+    int levelData[levelWidth][levelHeight] = {{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1}};
+    
+    //*texture = TextureHolder::GetTexture("../Resources/Images/Block.png");
+    vector<vector<Block>> map;
+    for(int x =	 0 ; x< levelWidth ;x+=1){
+        map.push_back(vector<Block>());
+        for(int y = 0; y< levelHeight ; y+=1){
+            
+            if(levelData[x][y] == 0) continue;
+            try{
+                Block block(TextureHolder::GetTexture("/Users/cianfarrell/Documents/GitHub/finalAssignment/Resources/Images/Block.png"), Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),Vector2i(BLOCK_WIDTH,BLOCK_WIDTH),true);
+
+            map[x].push_back(block);
+            } catch(exception e){
+                cerr<<e.what()<<endl;
+            }
         }
-        cout<<endl;
     }
     level = new Level(map);
 }

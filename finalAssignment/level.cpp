@@ -8,15 +8,14 @@
 
 #include "level.hpp"
 #include <map>
+#include <iostream>
 
-Level::Level(map<Vector2i,Block> blocks)
+Level::Level(vector<vector<Block>> blocks)
 {
-    map<Vector2i,Block>::iterator iter;
-    for(iter = blocks.begin();iter!=blocks.end();++iter){
-        m_Map.insert(*iter);
-    }
+    m_Map = new vector<vector<Block>>(blocks);
+
 }
 
-map<Vector2i,Block>* Level::getBlocks(){
-    return &m_Map;
+vector<vector<Block>>* Level::getBlocks(){
+    return m_Map;
 }
