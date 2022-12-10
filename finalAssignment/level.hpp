@@ -13,6 +13,7 @@
 #include "block.hpp"
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <cmath>
 
 using namespace sf;
 using namespace std;
@@ -25,7 +26,7 @@ public:
     Level(vector<vector<Block>> blocks);
     Block getBlock(Vector2i coords);
     vector<vector<Block>>* getBlocks();
-    bool isValidLocation(Vector2i coords);
+    bool isTouchingBlock(FloatRect object);
 };
 
 #endif /* level_hpp */
