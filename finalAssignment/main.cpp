@@ -13,6 +13,8 @@
 using namespace sf;
 
 const int BLOCK_WIDTH = 64; // Pixels
+const int CAMERA_DEADZONE = 80;
+const float INTERPOLATION_SPEED = .05;
 void populateLevels(Level*& level, int levelNumber);
 vector<vector<int>> retrieveLevelData(string filePath);
 TextureHolder textureHolder;
@@ -21,7 +23,11 @@ int main(int, char const**)
 {
     retrieveLevelData("../Resources/Levels/testLevel.txt");
     // Create the main window
-    sf::RenderWindow window(sf::VideoMode(1200, 600), "SFML window");
+    Vector2f resolution;
+    resolution.x = VideoMode::getDesktopMode().width;
+    resolution.y = VideoMode::getDesktopMode().height;
+    RenderWindow window(VideoMode(resolution.x,resolution.y),"Test Game");
+    View mainView(sf::FloatRect(0,0,resolution.x,resolution.y));
     Level* level;
     // Start the game loop
     populateLevels(level , 1);
@@ -32,7 +38,7 @@ int main(int, char const**)
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
     Character character;
-    character.spawn(Vector2i(160,100),BLOCK_WIDTH,(Vector2f) window.getSize());
+    character.spawn(Vector2i(250,100),BLOCK_WIDTH,(Vector2f) window.getSize());
     bool paused = false;
     
     while (window.isOpen())
@@ -59,7 +65,6 @@ int main(int, char const**)
             
             mouseScreenPosition = Mouse::getPosition(window);
             bool touchingGround = level->isTouchingBlock(character.getPosition());
-            character.update(dtAsSeconds, mouseScreenPosition, touchingGround);
             
             //character Movement
             
@@ -71,7 +76,15 @@ int main(int, char const**)
             else character.stopRight();
             
             if(Keyboard::isKeyPressed(Keyboard::Space))
-                character.jump(.4, touchingGround);
+                character.jump((resolution.y*5)/10000, touchingGround);
+            character.update(dtAsSeconds, mouseScreenPosition, touchingGround);
+            //camera movement
+            Vector2f position(character.getPosition().left,character.getPosition().top) ;
+            if(std::abs(mainView.getCenter().x - position.x) > CAMERA_DEADZONE ||
+               std::abs(mainView.getCenter().y - position.y) > CAMERA_DEADZONE){
+                Vector2f interpolatedPos = mainView.getCenter() + (position - mainView.getCenter())*INTERPOLATION_SPEED;
+                mainView.setCenter(interpolatedPos);
+            }
             
             
         }
@@ -81,7 +94,7 @@ int main(int, char const**)
         //Draw Sprites
         window.clear();
     
-        
+        window.setView(mainView);
         
         vector<vector<Block>>* blocks = level ->getBlocks();
         for(int x = 0; x< blocks->size();++x){
@@ -111,8 +124,6 @@ void populateLevels(Level*& level, int levelNumber){
     for(int x =	 0 ; x<levelData.size() ;x+=1){
         map.push_back(vector<Block>());
         for(int y = 0; y< levelData[x].size() ; y+=1){
-            cout<<levelData[x][y];
-            
             if(levelData[x][y] == 0){
                 Block block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
                 map[x].push_back(block);
@@ -124,7 +135,6 @@ void populateLevels(Level*& level, int levelNumber){
             }
             
         }
-    std::cout<<std::endl;
     }
     level = new Level(map);
 }
