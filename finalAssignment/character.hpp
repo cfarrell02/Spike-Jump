@@ -42,7 +42,7 @@ public:
     int getHealth();
     void moveLeft(), moveRight();
     void stopLeft(), stopRight();
-    void jump(float power, Clock& clock, bool isGrounded);
+    void jump(float power, bool isGrounded);
     void update(float elapsedTime, Vector2i mousePosition, bool groundContact);
     void upgradeSpeed();
     void upgradeHealth();

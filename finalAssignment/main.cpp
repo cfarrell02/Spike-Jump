@@ -6,21 +6,25 @@
 #include "level.hpp"
 #include "textureHolder.hpp"
 #include "character.hpp"
-
+#include <fstream>
+#include <string>
+#include <sstream>
 
 using namespace sf;
 
 const int BLOCK_WIDTH = 64; // Pixels
-void populateLevels(Level*& level);
+void populateLevels(Level*& level, int levelNumber);
+vector<vector<int>> retrieveLevelData(string filePath);
 TextureHolder textureHolder;
 
 int main(int, char const**)
 {
+    retrieveLevelData("../Resources/Levels/testLevel.txt");
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(1200, 600), "SFML window");
     Level* level;
     // Start the game loop
-    populateLevels(level);
+    populateLevels(level , 1);
     
 
     Clock clock;
@@ -59,15 +63,15 @@ int main(int, char const**)
             
             //character Movement
             
-            if(Keyboard::isKeyPressed(Keyboard::A))
+            if(Keyboard::isKeyPressed(Keyboard::A) && level->canMoveLeft(character.getPosition()))
                 character.moveLeft();
             else character.stopLeft();
-            if(Keyboard::isKeyPressed(Keyboard::D))
+            if(Keyboard::isKeyPressed(Keyboard::D) && level->canMoveRight(character.getPosition()))
                 character.moveRight();
             else character.stopRight();
             
             if(Keyboard::isKeyPressed(Keyboard::Space))
-                character.jump(1,clock, touchingGround);
+                character.jump(.4, touchingGround);
             
             
         }
@@ -96,27 +100,64 @@ int main(int, char const**)
     return 0;
 }
 
-void populateLevels(Level*& level){
-
-    vector<vector<int>> levelData = {{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1},{0,0,0,0,0,1,1,1,1,1}};
+void populateLevels(Level*& level, int levelNumber){
     
+    std::stringstream ss;
+    ss<<"../Resources/Levels/level"<<levelNumber<<".txt";
+
+    vector<vector<int>> levelData = retrieveLevelData(ss.str());
     //*texture = TextureHolder::GetTexture("../Resources/Images/Block.png");
     vector<vector<Block>> map;
     for(int x =	 0 ; x<levelData.size() ;x+=1){
         map.push_back(vector<Block>());
         for(int y = 0; y< levelData[x].size() ; y+=1){
+            cout<<levelData[x][y];
             
             if(levelData[x][y] == 0){
                 Block block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
                 map[x].push_back(block);
                 
             }else{
-                Block block(TextureHolder::GetTexture("../Resources/Images/Block.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
+                Block block(TextureHolder::GetTexture("../Resources/Images/greyBlock1.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
                 map[x].push_back(block);
                 
             }
             
         }
+    std::cout<<std::endl;
     }
     level = new Level(map);
+}
+
+vector<vector<int>> retrieveLevelData(string filePath) {
+  std::ifstream myfile (filePath);
+  vector<vector<int>> result;
+  std::string myline;
+
+  if ( myfile.is_open() ) {
+    // Read the first line of the file
+    std::getline (myfile, myline);
+
+    // Create a vector of integers for each character in the line
+    for (int i = 0; i < myline.size(); i++) {
+      result.push_back(vector<int>());
+    }
+
+    // Iterate over the characters in the line
+    for (int i = 0; i < myline.size(); i++) {
+      // Add the character to the corresponding column of the result vector
+      result.at(i).push_back(myline[i] - '0');
+    }
+
+    // Read the remaining lines of the file
+    while (std::getline (myfile, myline)) {
+      // Iterate over the characters in the line
+      for (int i = 0; i < myline.size(); i++) {
+        // Add the character to the corresponding column of the result vector
+        result.at(i).push_back(myline[i] - '0');
+      }
+    }
+  }
+
+  return result;
 }

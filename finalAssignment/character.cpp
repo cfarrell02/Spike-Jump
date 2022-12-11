@@ -81,9 +81,8 @@ void Character::stopRight(){
 }
 
 void Character::update(float elapsedTime, Vector2i mousePosition,bool groundContact){
-   // std::cout<<clock.getElapsedTime().asSeconds()<<"  -  "<<m_LastJump.asSeconds()<<std::endl;
+//    std::cout<<clock.getElapsedTime().asSeconds()<<std::endl;
     float change = m_Speed*elapsedTime;
-    float angle = 0;
     if(m_RightPressed){
         m_Position.x += change;
       //  m_Sprite.rotate(ROTATION_SPEED);
@@ -95,7 +94,7 @@ void Character::update(float elapsedTime, Vector2i mousePosition,bool groundCont
     
     if(!groundContact){
         m_VerticalVelocity += GRAVITY * elapsedTime;
-    }else{
+    }else if(m_VerticalVelocity>0){
         m_VerticalVelocity = 0;
     }
     m_Position.y += m_VerticalVelocity;
@@ -118,15 +117,17 @@ void Character::increaseHealthLevel(int amount){
 }
 
 
-//TODO Fix this method
-void Character::jump(float power, sf::Clock& clock, bool isGrounded) {
+//TODO Fix this the way m_VVeolcity is applied
+void Character::jump(float power, bool isGrounded) {
   // Get the elapsed time since the last jump
-    if(!isGrounded) return;
+  if(!isGrounded) return;
 
   // Check if the jump cooldown has elapsed
   if (clock.getElapsedTime().asSeconds() >= m_JumpCoolDown) {
+
     // Jump if the cooldown has elapsed
-    m_Position.y -= power;
+    m_VerticalVelocity = -power;
+ //   m_Position.y += m_VerticalVelocity;
 
     // Update the last jump time
     clock.restart();
