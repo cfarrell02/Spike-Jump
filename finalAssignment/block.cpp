@@ -8,8 +8,8 @@
 
 #include "block.hpp"
 
-Block::Block(Texture& texture,FloatRect pos, bool isWalkable):
-m_IsWalkable(isWalkable), m_Position(pos)
+Block::Block(Texture& texture,FloatRect pos, bool isWalkable, bool levelExit, int damageAmount):
+m_IsWalkable(isWalkable), m_Position(pos), m_DamageAmount(damageAmount), m_LevelExit(levelExit)
 {
     m_Sprite.setTexture(texture);
     //m_Sprite.setOrigin(size.x/2, size.y/2);
@@ -25,6 +25,12 @@ FloatRect Block::getPosition(){
 Sprite Block::getSprite(){
     return m_Sprite;
 }
+
+//Hazard::Hazard(Texture& texture, FloatRect pos, int damageAmount, bool isWalkable):
+//    Block(texture, pos,isWalkable), damageAmount(damageAmount)
+//{
+//    
+//}
 
 //Block& Block::operator=(const Block& b){
 //    if (this != &b) {

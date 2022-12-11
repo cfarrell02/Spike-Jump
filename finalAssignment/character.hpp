@@ -17,7 +17,7 @@ using namespace sf;
 
 class Character{
 private:
-    const float START_SPEED = 200;
+    const float START_SPEED = 300;
     const float START_HEALTH = 100;
     Vector2f m_Position, m_Resolution;
     Sprite m_Sprite;
@@ -28,7 +28,7 @@ private:
     Time m_LastHit;
     float m_JumpCoolDown = .1;
     float m_Speed, m_VerticalVelocity = 0;
-    const int GRAVITY = 1, ROTATION_SPEED = 1;
+    const int GRAVITY = 6;
 public:
     Character();
     void spawn(Vector2i spawnLocation,  int tileSize, Vector2f resolution);

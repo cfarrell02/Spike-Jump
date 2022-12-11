@@ -20,11 +20,20 @@ private:
     FloatRect m_Position;
     
 public:
-    const bool m_IsWalkable;
-    Block(Texture& texture, FloatRect pos, bool isWalkable = true);
+    const bool m_IsWalkable, m_LevelExit;
+    const int m_DamageAmount;
+    Block(Texture& texture, FloatRect pos, bool isWalkable = true, bool levelExit = false, int damageAmount = 0);
     FloatRect getPosition();
     Sprite getSprite();
     Block& operator=(const Block& b);
 };
 
+//class Hazard : public Block {
+//private:
+//    int damageAmount;
+//public:
+//    Hazard(Texture& texture, FloatRect pos, int damageAmount, bool isWalkable = true);
+//    
+//    
+//};
 #endif /* block_hpp */

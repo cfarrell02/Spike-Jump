@@ -15,13 +15,13 @@ using namespace sf;
 const int BLOCK_WIDTH = 64; // Pixels
 const int CAMERA_DEADZONE = 80;
 const float INTERPOLATION_SPEED = .05;
-void populateLevels(Level*& level, int levelNumber);
+void populateLevels(Level*& level,Character& character,RenderWindow& window, int levelNumber);
 vector<vector<int>> retrieveLevelData(string filePath);
 TextureHolder textureHolder;
+const string textureNames[3] = {"greyBlock","redBlock","blueBlock"};
 
 int main(int, char const**)
 {
-    retrieveLevelData("../Resources/Levels/testLevel.txt");
     // Create the main window
     Vector2f resolution;
     resolution.x = VideoMode::getDesktopMode().width;
@@ -30,7 +30,7 @@ int main(int, char const**)
     View mainView(sf::FloatRect(0,0,resolution.x,resolution.y));
     Level* level;
     // Start the game loop
-    populateLevels(level , 1);
+
     
 
     Clock clock;
@@ -38,7 +38,8 @@ int main(int, char const**)
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
     Character character;
-    character.spawn(Vector2i(250,100),BLOCK_WIDTH,(Vector2f) window.getSize());
+    populateLevels(level , character, window,  1);
+    
     bool paused = false;
     
     while (window.isOpen())
@@ -76,7 +77,7 @@ int main(int, char const**)
             else character.stopRight();
             
             if(Keyboard::isKeyPressed(Keyboard::Space))
-                character.jump((resolution.y*5)/10000, touchingGround);
+                character.jump((resolution.y)*2/1000, touchingGround);
             character.update(dtAsSeconds, mouseScreenPosition, touchingGround);
             //camera movement
             Vector2f position(character.getPosition().left,character.getPosition().top) ;
@@ -113,10 +114,11 @@ int main(int, char const**)
     return 0;
 }
 
-void populateLevels(Level*& level, int levelNumber){
+void populateLevels(Level*& level,Character& character, RenderWindow& window, int levelNumber){
     
     std::stringstream ss;
     ss<<"../Resources/Levels/level"<<levelNumber<<".txt";
+    srand((int) time(0));
 
     vector<vector<int>> levelData = retrieveLevelData(ss.str());
     //*texture = TextureHolder::GetTexture("../Resources/Images/Block.png");
@@ -124,12 +126,19 @@ void populateLevels(Level*& level, int levelNumber){
     for(int x =	 0 ; x<levelData.size() ;x+=1){
         map.push_back(vector<Block>());
         for(int y = 0; y< levelData[x].size() ; y+=1){
-            if(levelData[x][y] == 0){
+            if(levelData[x][y] == 0 || levelData[x][y] == 9){
                 Block block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
                 map[x].push_back(block);
+                if(levelData[x][y] == 9)
+                    character.spawn(Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),BLOCK_WIDTH,(Vector2f) window.getSize());
                 
             }else{
-                Block block(TextureHolder::GetTexture("../Resources/Images/greyBlock1.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
+                
+                int index = (rand()%3) + 1;
+                
+                stringstream url;
+                url<<"../Resources/Images/"<<textureNames[0]<<index<<".png";
+                Block block(TextureHolder::GetTexture(url.str()),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
                 map[x].push_back(block);
                 
             }
