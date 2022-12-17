@@ -9,13 +9,23 @@
 #include "level.hpp"
 #include <iostream>
 
-Level::Level(vector<vector<Block>> blocks)
+Level::Level(vector<vector<Block*>> blocks)
 {
-    m_Map = new vector<vector<Block>>(blocks);
+    m_Map = blocks;
 
 }
 
-vector<vector<Block>>* Level::getBlocks(){
+Level::~Level(){
+    for(int x = 0 ; x<m_Map.size();++x){
+        for(int y = 0 ; y < m_Map.at(x).size();++y){
+            delete m_Map.at(x).at(y);
+        }
+    }
+    m_Map.clear();
+}
+
+
+vector<vector<Block*>> Level::getBlocks(){
     return m_Map;
 }
 
@@ -27,9 +37,9 @@ Block* Level::getIntersectingBlockBelow(FloatRect object)
     int blockY = std::round(object.top / 64);
 
     // Check if the block is within the bounds of the map
-    if (blockX >= 0 && blockX < m_Map->size() && blockY+1 >= 0 && blockY+1 < m_Map->at(blockX).size())
+    if (blockX >= 0 && blockX < m_Map.size() && blockY+1 >= 0 && blockY+1 < m_Map.at(blockX).size())
     {
-        Block* nearestBlock = &m_Map->at(blockX).at(blockY+1);
+        Block* nearestBlock = m_Map.at(blockX).at(blockY+1);
 
         // Check if the rectangle is intersecting with the block's Position
         if (nearestBlock->getPosition().intersects(object))
@@ -55,9 +65,9 @@ Block* Level::getIntersectingBlock(FloatRect object)
     int blockY = std::round(object.top / 64);
 
     // Check if the block is within the bounds of the map
-    if (blockX >= 0 && blockX < m_Map->size() && blockY >= 0 && blockY < m_Map->at(blockX).size())
+    if (blockX >= 0 && blockX < m_Map.size() && blockY >= 0 && blockY < m_Map.at(blockX).size())
     {
-        Block* nearestBlock = &m_Map->at(blockX).at(blockY);
+        Block* nearestBlock = m_Map.at(blockX).at(blockY);
 
         // Check if the rectangle is intersecting with the block's Position
         if (nearestBlock->getPosition().intersects(object))
@@ -89,9 +99,9 @@ bool Level::canMoveLeft(FloatRect object){
     Block* nearestBlock = nullptr;
 
     // Check if the block is within the bounds of the map
-    if (blockX-1>=0 && blockX-1< m_Map->size() && blockY >= 0 && blockY < m_Map->at(blockX-1).size())
+    if (blockX-1>=0 && blockX-1< m_Map.size() && blockY >= 0 && blockY < m_Map.at(blockX-1).size())
     {
-        nearestBlock = &m_Map->at(blockX-1).at(blockY);
+        nearestBlock = m_Map.at(blockX-1).at(blockY);
 
         // Check if the rectangle is intersecting with the block's Position
         if (nearestBlock->getPosition().intersects(object))
@@ -117,9 +127,9 @@ bool Level::canMoveRight(FloatRect object){
     Block* nearestBlock = nullptr;
 
     // Check if the block is within the bounds of the map
-    if (blockX+1>=0 && blockX+1< m_Map->size() && blockY >= 0 && blockY < m_Map->at(blockX+1).size())
+    if (blockX+1>=0 && blockX+1< m_Map.size() && blockY >= 0 && blockY < m_Map.at(blockX+1).size())
     {
-        nearestBlock = &m_Map->at(blockX+1).at(blockY);
+        nearestBlock = m_Map.at(blockX+1).at(blockY);
 
         // Check if the rectangle is intersecting with the block's Position
         if (nearestBlock->getPosition().intersects(object))

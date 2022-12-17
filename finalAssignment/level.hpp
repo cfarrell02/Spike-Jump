@@ -21,11 +21,12 @@ using namespace std;
 class Level {
 private:
     Vector2i m_levelDimensions;
-    vector<vector<Block>>* m_Map;
+    vector<vector<Block*>> m_Map;
 public:
-    Level(vector<vector<Block>> blocks);
+    Level(vector<vector<Block*>> blocks);
+    ~Level();
     Block getBlock(Vector2i coords);
-    vector<vector<Block>>* getBlocks();
+    vector<vector<Block*>> getBlocks();
     Block* getIntersectingBlock(FloatRect object);
     Block* getIntersectingBlockBelow(FloatRect object);
     bool canMoveRight(FloatRect object), canMoveLeft(FloatRect object);

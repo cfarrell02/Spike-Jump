@@ -38,7 +38,9 @@ int main(int, char const**)
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
     Character character;
-    populateLevel(level , character, window,  1);
+    int levelIndex = 1;
+    populateLevel(level , character, window,  levelIndex);
+    
     
     bool paused = false;
     
@@ -66,6 +68,8 @@ int main(int, char const**)
             Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
             if(intersectingBlock != nullptr && intersectingBlock->m_LevelExit){
                 cout<<"Loading next level!!\n";
+                delete level;
+                populateLevel(level, character, window, ++levelIndex);
             }
             Time dt = clock.restart();
             gameTimeTotal += dt;
@@ -93,9 +97,6 @@ int main(int, char const**)
                 mainView.setCenter(interpolatedPos);
             }
             
-            if(touchingBlock != nullptr && touchingBlock->m_LevelExit){
-                cout<<"Loading next level\n";
-            }
             
             
         }
@@ -108,19 +109,22 @@ int main(int, char const**)
         window.setView(mainView);
         //TODO:  Fix this part!!!!! <------
         window.draw(character.getSprite());
-        vector<vector<Block>>* blocks = level ->getBlocks();
-        for(int x = 0; x< blocks->size();++x){
-            for(int y = 0 ; y< blocks->at(x).size();++y){
+        vector<vector<Block*>> blocks = level ->getBlocks();
+        for(int x = 0; x< blocks.size();++x){
+            for(int y = 0 ; y< blocks.at(x).size();++y){
                 //if(blocks->at(x).at(y).m_MoveDirection==0)
-                blocks->at(x).at(y).update();
+                blocks.at(x).at(y)->update();
                 
-                window.draw((blocks->at(x)).at(y).getSprite());
+                window.draw((blocks.at(x)).at(y)->getSprite());
             }
         }
 
         // Update the window
         window.display();
+        
     }
+    delete level;
+    level = nullptr;
 
     return 0;
 }
@@ -133,23 +137,23 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
 
     vector<vector<int>> levelData = retrieveLevelData(ss.str());
     //*texture = TextureHolder::GetTexture("../Resources/Images/Block.png");
-    vector<vector<Block>> map;
+    vector<vector<Block*>> map;
     for(int x =	 0 ; x<levelData.size() ;x+=1){
-        map.push_back(vector<Block>());
+        map.push_back(vector<Block*>());
         for(int y = 0; y< levelData[x].size() ; y+=1){
             int index = (rand()%3) + 1;
             if(levelData[x][y] == 0 || levelData[x][y] == 9){
-                Block block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
+                Block* block = new Block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
                 map[x].push_back(block);
                 if(levelData[x][y] == 9)
                     character.spawn(Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),BLOCK_WIDTH,(Vector2f) window.getSize());
                 
             }else if(levelData[x][y] == 2){
-                Block block(TextureHolder::GetTexture("../Resources/Images/redBlock1.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true,1);
+                Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/redBlock1.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true,1);
                 map[x].push_back(block);
             }
             else if(levelData[x][y] == 3){
-                Block block(TextureHolder::GetTexture("../Resources/Images/levelExit.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,true);
+                Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/levelExit.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,true);
                 map[x].push_back(block);
             }
             else{
@@ -158,7 +162,7 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
                 
                 stringstream url;
                 url<<"../Resources/Images/greyBlock"<<index<<".png";
-                Block block(TextureHolder::GetTexture(url.str()),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
+                Block* block = new Block(TextureHolder::GetTexture(url.str()),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
                 map[x].push_back(block);
                 
             }
