@@ -14,6 +14,7 @@ using namespace sf;
 
 const int BLOCK_WIDTH = 64; // Pixels
 const int CAMERA_DEADZONE = 80;
+const int MAX_LIVES = 3;
 const float INTERPOLATION_SPEED = .05;
 void populateLevel(Level*& level,Character& character,RenderWindow& window, int levelNumber);
 vector<vector<int>> retrieveLevelData(string filePath);
@@ -38,7 +39,7 @@ int main(int, char const**)
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
     Character character;
-    int levelIndex = 1;
+    int levelIndex = 1, lives = MAX_LIVES;
     populateLevel(level , character, window,  levelIndex);
     
     
@@ -66,10 +67,15 @@ int main(int, char const**)
             Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition());
             bool touchingGround = touchingBlock != nullptr;
             Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
-            if(intersectingBlock != nullptr && intersectingBlock->m_LevelExit){
-                cout<<"Loading next level!!\n";
-                delete level;
-                populateLevel(level, character, window, ++levelIndex);
+            if(intersectingBlock != nullptr ){
+                if(intersectingBlock->m_LevelExit){
+                    cout<<"Loading next level!!\n";
+                    delete level;
+                    populateLevel(level, character, window, ++levelIndex);
+                }else if(intersectingBlock->m_isHazard){
+                    cout<<--lives<<" Lives remaining\n";
+                    populateLevel(level, character, window, levelIndex);
+                }
             }
             Time dt = clock.restart();
             gameTimeTotal += dt;
@@ -100,6 +106,8 @@ int main(int, char const**)
             
             
         }
+        //Temp death condition
+        if(lives <= 0) return 0;
         
         
 
@@ -107,7 +115,6 @@ int main(int, char const**)
         window.clear();
     
         window.setView(mainView);
-        //TODO:  Fix this part!!!!! <------
         window.draw(character.getSprite());
         vector<vector<Block*>> blocks = level ->getBlocks();
         for(int x = 0; x< blocks.size();++x){
@@ -156,10 +163,11 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
                 Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/levelExit.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,true);
                 map[x].push_back(block);
             }
+            else if(levelData[x][y] == 4){
+                Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/spikes.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,false,true);
+                map[x].push_back(block);
+            }
             else{
-                
-                
-                
                 stringstream url;
                 url<<"../Resources/Images/greyBlock"<<index<<".png";
                 Block* block = new Block(TextureHolder::GetTexture(url.str()),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);

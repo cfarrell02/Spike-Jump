@@ -23,11 +23,11 @@ private:
     bool m_IsWalkable, m_CountDown = true;
     Clock hitClock;
 public:
-    const bool m_LevelExit;
-    const int m_DamageAmount, m_FadeTimeout;
+    const bool m_LevelExit, m_isHazard;
+    const int m_FadeTimeout;
 //    float m_MoveDirection;
     bool isWalkable();
-    Block(Texture& texture, FloatRect pos, bool isWalkable = true ,int timeOut = -1, bool levelExit = false, int damageAmount = 0);
+    Block(Texture& texture, FloatRect pos, bool isWalkable = true ,int timeOut = -1, bool levelExit = false, bool hazard = false);
     FloatRect getPosition();
     Sprite getSprite();
     void update();

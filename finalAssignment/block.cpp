@@ -9,8 +9,8 @@
 #include "block.hpp"
 #include <cmath>
 
-Block::Block(Texture& texture,FloatRect pos, bool isWalkable,int timeOut , bool levelExit, int damageAmount):
-m_IsWalkable(isWalkable), m_Position(pos), m_DamageAmount(damageAmount), m_LevelExit(levelExit), m_FadeTimeout(timeOut)
+Block::Block(Texture& texture,FloatRect pos, bool isWalkable,int timeOut , bool levelExit, bool hazard):
+m_IsWalkable(isWalkable), m_Position(pos), m_isHazard(hazard), m_LevelExit(levelExit), m_FadeTimeout(timeOut)
 {
     m_Sprite.setTexture(texture);
 
