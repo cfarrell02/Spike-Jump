@@ -63,6 +63,10 @@ int main(int, char const**)
         if(!paused){
             Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition());
             bool touchingGround = touchingBlock != nullptr;
+            Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
+            if(intersectingBlock != nullptr && intersectingBlock->m_LevelExit){
+                cout<<"Loading next level!!\n";
+            }
             Time dt = clock.restart();
             gameTimeTotal += dt;
             float dtAsSeconds = dt.asSeconds();
@@ -113,10 +117,7 @@ int main(int, char const**)
                 window.draw((blocks->at(x)).at(y).getSprite());
             }
         }
-        Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
-        if(intersectingBlock != nullptr && intersectingBlock->m_LevelExit){
-            cout<<"Loading next level!!\n";
-        }
+
         // Update the window
         window.display();
     }
