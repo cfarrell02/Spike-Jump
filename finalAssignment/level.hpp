@@ -26,7 +26,9 @@ public:
     Level(vector<vector<Block>> blocks);
     Block getBlock(Vector2i coords);
     vector<vector<Block>>* getBlocks();
-    bool isTouchingBlock(FloatRect object), canMoveRight(FloatRect object), canMoveLeft(FloatRect object);
+    Block* getIntersectingBlock(FloatRect object);
+    Block* getIntersectingBlockBelow(FloatRect object);
+    bool canMoveRight(FloatRect object), canMoveLeft(FloatRect object);
 };
 
 #endif /* level_hpp */

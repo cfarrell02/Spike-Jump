@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <SFML/Graphics.hpp>
 #include <math.h>
+#include "block.hpp"
 
 using namespace sf;
 
@@ -40,6 +41,7 @@ public:
     float getRotation();
     Sprite getSprite();
     int getHealth();
+    void matchBlockVelocity(Block* block);
     void moveLeft(), moveRight();
     void stopLeft(), stopRight();
     void jump(float power, bool isGrounded);

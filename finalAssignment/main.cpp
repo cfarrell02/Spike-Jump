@@ -15,17 +15,17 @@ using namespace sf;
 const int BLOCK_WIDTH = 64; // Pixels
 const int CAMERA_DEADZONE = 80;
 const float INTERPOLATION_SPEED = .05;
-void populateLevels(Level*& level,Character& character,RenderWindow& window, int levelNumber);
+void populateLevel(Level*& level,Character& character,RenderWindow& window, int levelNumber);
 vector<vector<int>> retrieveLevelData(string filePath);
 TextureHolder textureHolder;
-const string textureNames[3] = {"greyBlock","redBlock","blueBlock"};
 
 int main(int, char const**)
 {
     // Create the main window
     Vector2f resolution;
-    resolution.x = VideoMode::getDesktopMode().width;
-    resolution.y = VideoMode::getDesktopMode().height;
+    resolution.x = VideoMode::getDesktopMode().width/2;
+    resolution.y = VideoMode::getDesktopMode().height/2;
+    
     RenderWindow window(VideoMode(resolution.x,resolution.y),"Test Game");
     View mainView(sf::FloatRect(0,0,resolution.x,resolution.y));
     Level* level;
@@ -38,7 +38,7 @@ int main(int, char const**)
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
     Character character;
-    populateLevels(level , character, window,  1);
+    populateLevel(level , character, window,  1);
     
     bool paused = false;
     
@@ -59,16 +59,18 @@ int main(int, char const**)
                 window.close();
             }
         }
+
         if(!paused){
+            Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition());
+            bool touchingGround = touchingBlock != nullptr;
             Time dt = clock.restart();
             gameTimeTotal += dt;
             float dtAsSeconds = dt.asSeconds();
             
             mouseScreenPosition = Mouse::getPosition(window);
-            bool touchingGround = level->isTouchingBlock(character.getPosition());
+
             
             //character Movement
-            
             if(Keyboard::isKeyPressed(Keyboard::A) && level->canMoveLeft(character.getPosition()))
                 character.moveLeft();
             else character.stopLeft();
@@ -77,7 +79,7 @@ int main(int, char const**)
             else character.stopRight();
             
             if(Keyboard::isKeyPressed(Keyboard::Space))
-                character.jump((resolution.y)*2/1000, touchingGround);
+                character.jump(4, touchingGround);
             character.update(dtAsSeconds, mouseScreenPosition, touchingGround);
             //camera movement
             Vector2f position(character.getPosition().left,character.getPosition().top) ;
@@ -85,6 +87,10 @@ int main(int, char const**)
                std::abs(mainView.getCenter().y - position.y) > CAMERA_DEADZONE){
                 Vector2f interpolatedPos = mainView.getCenter() + (position - mainView.getCenter())*INTERPOLATION_SPEED;
                 mainView.setCenter(interpolatedPos);
+            }
+            
+            if(touchingBlock != nullptr && touchingBlock->m_LevelExit){
+                cout<<"Loading next level\n";
             }
             
             
@@ -96,17 +102,21 @@ int main(int, char const**)
         window.clear();
     
         window.setView(mainView);
-        
+        //TODO:  Fix this part!!!!! <------
+        window.draw(character.getSprite());
         vector<vector<Block>>* blocks = level ->getBlocks();
         for(int x = 0; x< blocks->size();++x){
             for(int y = 0 ; y< blocks->at(x).size();++y){
+                //if(blocks->at(x).at(y).m_MoveDirection==0)
+                blocks->at(x).at(y).update();
+                
                 window.draw((blocks->at(x)).at(y).getSprite());
             }
         }
-        
-        window.draw(character.getSprite());
-
-        
+        Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
+        if(intersectingBlock != nullptr && intersectingBlock->m_LevelExit){
+            cout<<"Loading next level!!\n";
+        }
         // Update the window
         window.display();
     }
@@ -114,7 +124,7 @@ int main(int, char const**)
     return 0;
 }
 
-void populateLevels(Level*& level,Character& character, RenderWindow& window, int levelNumber){
+void populateLevel(Level*& level,Character& character, RenderWindow& window, int levelNumber){
     
     std::stringstream ss;
     ss<<"../Resources/Levels/level"<<levelNumber<<".txt";
@@ -126,18 +136,27 @@ void populateLevels(Level*& level,Character& character, RenderWindow& window, in
     for(int x =	 0 ; x<levelData.size() ;x+=1){
         map.push_back(vector<Block>());
         for(int y = 0; y< levelData[x].size() ; y+=1){
+            int index = (rand()%3) + 1;
             if(levelData[x][y] == 0 || levelData[x][y] == 9){
                 Block block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
                 map[x].push_back(block);
                 if(levelData[x][y] == 9)
                     character.spawn(Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),BLOCK_WIDTH,(Vector2f) window.getSize());
                 
-            }else{
+            }else if(levelData[x][y] == 2){
+                Block block(TextureHolder::GetTexture("../Resources/Images/redBlock1.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true,1);
+                map[x].push_back(block);
+            }
+            else if(levelData[x][y] == 3){
+                Block block(TextureHolder::GetTexture("../Resources/Images/levelExit.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,true);
+                map[x].push_back(block);
+            }
+            else{
                 
-                int index = (rand()%3) + 1;
+                
                 
                 stringstream url;
-                url<<"../Resources/Images/"<<textureNames[0]<<index<<".png";
+                url<<"../Resources/Images/greyBlock"<<index<<".png";
                 Block block(TextureHolder::GetTexture(url.str()),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true);
                 map[x].push_back(block);
                 

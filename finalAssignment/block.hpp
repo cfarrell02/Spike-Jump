@@ -12,28 +12,28 @@
 #include <stdio.h>
 #include <SFML/Graphics.hpp>
 #include <string>
+#include "textureHolder.hpp"
 
 using namespace::sf;
 class Block {
 private:
     Sprite m_Sprite;
     FloatRect m_Position;
-    
+//    Vector2f m_StartPos,m_EndPos;
+    bool m_IsWalkable, m_CountDown = true;
+    Clock hitClock;
 public:
-    const bool m_IsWalkable, m_LevelExit;
-    const int m_DamageAmount;
-    Block(Texture& texture, FloatRect pos, bool isWalkable = true, bool levelExit = false, int damageAmount = 0);
+    const bool m_LevelExit;
+    const int m_DamageAmount, m_FadeTimeout;
+//    float m_MoveDirection;
+    bool isWalkable();
+    Block(Texture& texture, FloatRect pos, bool isWalkable = true ,int timeOut = -1, bool levelExit = false, int damageAmount = 0);
     FloatRect getPosition();
     Sprite getSprite();
+    void update();
+    void startCountdown();
     Block& operator=(const Block& b);
 };
 
-//class Hazard : public Block {
-//private:
-//    int damageAmount;
-//public:
-//    Hazard(Texture& texture, FloatRect pos, int damageAmount, bool isWalkable = true);
-//    
-//    
-//};
+
 #endif /* block_hpp */
