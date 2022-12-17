@@ -18,37 +18,30 @@ using namespace sf;
 
 class Character{
 private:
-    const float START_SPEED = 300;
-    const float START_HEALTH = 100;
     Vector2f m_Position, m_Resolution;
     Sprite m_Sprite;
     Texture m_Texture;
-    int m_TileSize, m_Health, m_MaxHealth;
+    int m_TileSize, m_Lives, m_Coins;
     bool m_LeftPressed, m_RightPressed;
     Clock clock;
     Time m_LastHit;
     float m_JumpCoolDown = .1;
     float m_Speed, m_VerticalVelocity = 0;
-    const int GRAVITY = 6;
+    const int GRAVITY = 6, MAX_LIVES;
 public:
-    Character();
-    void spawn(Vector2i spawnLocation,  int tileSize, Vector2f resolution);
+    Character(int lives, int speed);
+    void spawn(Vector2i spawnLocation,  int tileSize);
     void resetCharacterStats();
-    bool hit(Time timeHit);
-    Time getLastHitTime();
     FloatRect getPosition();
     Vector2f getCenter();
     float getRotation();
     Sprite getSprite();
-    int getHealth();
-    void matchBlockVelocity(Block* block);
     void moveLeft(), moveRight();
     void stopLeft(), stopRight();
     void jump(float power, bool isGrounded);
-    void update(float elapsedTime, Vector2i mousePosition, bool groundContact);
-    void upgradeSpeed();
-    void upgradeHealth();
-    void increaseHealthLevel(int amount);
+    void update(float elapsedTime, bool groundContact);
+    void addCoin();
+    int getCoinCount();
     
 };
 

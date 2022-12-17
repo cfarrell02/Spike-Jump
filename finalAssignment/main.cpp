@@ -38,8 +38,8 @@ int main(int, char const**)
     Vector2f mouseWorldPosition;
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
-    Character character;
     int levelIndex = 1, lives = MAX_LIVES;
+    Character character(lives, 300);
     populateLevel(level , character, window,  levelIndex);
     
     
@@ -73,8 +73,11 @@ int main(int, char const**)
                     delete level;
                     populateLevel(level, character, window, ++levelIndex);
                 }else if(intersectingBlock->m_isHazard){
-                    cout<<--lives<<" Lives remaining\n";
+                    cout<<lives<<" Lives remaining\n";
                     populateLevel(level, character, window, levelIndex);
+                }else if(intersectingBlock->m_isCoin){
+                    character.addCoin();
+                    cout<<character.getCoinCount()<<" coins collected\n";
                 }
             }
             Time dt = clock.restart();
@@ -82,8 +85,6 @@ int main(int, char const**)
             float dtAsSeconds = dt.asSeconds();
             
             mouseScreenPosition = Mouse::getPosition(window);
-
-            
             //character Movement
             if(Keyboard::isKeyPressed(Keyboard::A) && level->canMoveLeft(character.getPosition()))
                 character.moveLeft();
@@ -93,8 +94,8 @@ int main(int, char const**)
             else character.stopRight();
             
             if(Keyboard::isKeyPressed(Keyboard::Space))
-                character.jump(4, touchingGround);
-            character.update(dtAsSeconds, mouseScreenPosition, touchingGround);
+                character.jump(6, touchingGround);
+            character.update(dtAsSeconds, touchingGround);
             //camera movement
             Vector2f position(character.getPosition().left,character.getPosition().top) ;
             if(std::abs(mainView.getCenter().x - position.x) > CAMERA_DEADZONE ||
@@ -102,9 +103,6 @@ int main(int, char const**)
                 Vector2f interpolatedPos = mainView.getCenter() + (position - mainView.getCenter())*INTERPOLATION_SPEED;
                 mainView.setCenter(interpolatedPos);
             }
-            
-            
-            
         }
         //Temp death condition
         if(lives <= 0) return 0;
@@ -153,7 +151,7 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
                 Block* block = new Block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
                 map[x].push_back(block);
                 if(levelData[x][y] == 9)
-                    character.spawn(Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),BLOCK_WIDTH,(Vector2f) window.getSize());
+                    character.spawn(Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),BLOCK_WIDTH);
                 
             }else if(levelData[x][y] == 2){
                 Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/redBlock1.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true,1);
@@ -165,6 +163,10 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
             }
             else if(levelData[x][y] == 4){
                 Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/spikes.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,false,true);
+                map[x].push_back(block);
+            }
+            else if(levelData[x][y] == 5){
+                Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/coin.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,false,false,true);
                 map[x].push_back(block);
             }
             else{

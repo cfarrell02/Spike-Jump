@@ -8,46 +8,42 @@
 #include "textureHolder.hpp"
 #include "character.hpp"
 
-Character::Character(){
-    m_Speed = START_SPEED;
-    m_Health = START_HEALTH;
-    m_MaxHealth = START_HEALTH;
+Character::Character(int lives, int speed):
+m_Lives(lives), MAX_LIVES(lives),m_Speed(speed){
     clock.restart();
     m_Sprite = Sprite(TextureHolder::GetTexture("../Resources/Images/Character.png"));
+    m_Coins = 0;
     
     
   //  m_Sprite.setOrigin(m_Sprite.getLocalBounds().width / 2.f, m_Sprite.getLocalBounds().height / 2.f);
     
 }
     
-void Character::spawn(Vector2i spawnLocation,  int tileSize, Vector2f resolution){
-        m_Position.x = spawnLocation.x;
-        m_Position.y = spawnLocation.y;
+void Character::spawn(Vector2i spawnLocation,  int tileSize){
+    resetCharacterStats();
+    m_Position.x = spawnLocation.x;
+    m_Position.y = spawnLocation.y;
+    
+    m_TileSize = tileSize;
         
-        m_TileSize = tileSize;
-        
-        m_Resolution.x = resolution.x;
-        m_Resolution.y = resolution.y;
+//        m_Resolution.x = resolution.x;
+//        m_Resolution.y = resolution.y;
     }
 
 void Character::resetCharacterStats(){
-    m_Speed = START_SPEED;
-    m_Health = START_HEALTH;
-    m_MaxHealth = START_HEALTH;
+    m_Lives = MAX_LIVES;
+    m_Coins = 0;
 }
 
-Time Character::getLastHitTime(){
-    return m_LastHit;
+void Character::addCoin(){
+    m_Coins++;
 }
 
-bool Character::hit(Time timeHit){
-    if(timeHit.asMilliseconds() - m_LastHit.asMilliseconds() >200){
-        m_LastHit = timeHit;
-        m_Health -= 10;
-        return true;
-    }
-    return false;
+int Character::getCoinCount(){
+    return m_Coins;
 }
+
+
 
 FloatRect Character::getPosition(){
     return m_Sprite.getGlobalBounds();
@@ -62,9 +58,6 @@ float Character::getRotation(){
 }
 Sprite Character::getSprite(){
     return m_Sprite;
-}
-int Character::getHealth(){
-    return m_Health;
 }
 void Character::moveLeft(){
     m_LeftPressed=true;
@@ -81,7 +74,9 @@ void Character::stopRight(){
 }
 
 
-void Character::update(float elapsedTime, Vector2i mousePosition,bool groundContact){
+
+
+void Character::update(float elapsedTime, bool groundContact){
 //    std::cout<<clock.getElapsedTime().asSeconds()<<std::endl;
     float change = m_Speed*elapsedTime;
     if(m_RightPressed){
@@ -103,19 +98,6 @@ void Character::update(float elapsedTime, Vector2i mousePosition,bool groundCont
 
 }
 
-void Character::upgradeSpeed(){
-    m_Speed += START_SPEED*.2;
-}
-void Character::upgradeHealth(){
-    m_Health += START_HEALTH*.2;
-}
-void Character::increaseHealthLevel(int amount){
-    m_Health += amount;
-    
-    if(m_Health > m_MaxHealth){
-        m_Health = m_MaxHealth;
-    }
-}
 
 
 void Character::jump(float power, bool isGrounded) {

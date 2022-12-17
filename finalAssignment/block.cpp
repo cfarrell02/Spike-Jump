@@ -9,8 +9,8 @@
 #include "block.hpp"
 #include <cmath>
 
-Block::Block(Texture& texture,FloatRect pos, bool isWalkable,int timeOut , bool levelExit, bool hazard):
-m_IsWalkable(isWalkable), m_Position(pos), m_isHazard(hazard), m_LevelExit(levelExit), m_FadeTimeout(timeOut)
+Block::Block(Texture& texture,FloatRect pos, bool isWalkable,int timeOut , bool levelExit, bool hazard, bool isCoin):
+m_IsWalkable(isWalkable), m_Position(pos), m_isHazard(hazard), m_LevelExit(levelExit), m_FadeTimeout(timeOut), m_isCoin(isCoin)
 {
     m_Sprite.setTexture(texture);
 
@@ -22,6 +22,11 @@ void Block::startCountdown(){
     if(!m_CountDown || m_FadeTimeout <= 0) return;
     hitClock.restart();
     m_CountDown = false;
+}
+
+void Block::remove(){
+    m_IsWalkable = false;
+    m_Sprite = Sprite(TextureHolder::GetTexture(""));
 }
 
 void Block::update(){
