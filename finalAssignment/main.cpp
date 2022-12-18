@@ -75,9 +75,10 @@ int main(int, char const**)
                 }else if(intersectingBlock->m_isHazard){
                     cout<<lives<<" Lives remaining\n";
                     populateLevel(level, character, window, levelIndex);
-                }else if(intersectingBlock->m_isCoin){
+                }else if(intersectingBlock->isCoin()){
                     character.addCoin();
                     cout<<character.getCoinCount()<<" coins collected\n";
+                    intersectingBlock->remove();
                 }
             }
             Time dt = clock.restart();

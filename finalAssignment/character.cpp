@@ -20,7 +20,6 @@ m_Lives(lives), MAX_LIVES(lives),m_Speed(speed){
 }
     
 void Character::spawn(Vector2i spawnLocation,  int tileSize){
-    resetCharacterStats();
     m_Position.x = spawnLocation.x;
     m_Position.y = spawnLocation.y;
     

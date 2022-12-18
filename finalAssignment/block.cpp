@@ -26,7 +26,11 @@ void Block::startCountdown(){
 
 void Block::remove(){
     m_IsWalkable = false;
+    m_isCoin = false;
     m_Sprite = Sprite(TextureHolder::GetTexture(""));
+}
+bool Block::isCoin(){
+    return m_isCoin;
 }
 
 void Block::update(){
