@@ -38,13 +38,58 @@ int main(int, char const**)
     Vector2f mouseWorldPosition;
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
-    int levelIndex = 1, lives = MAX_LIVES;
-    Character character(lives, 300);
+    int levelIndex = 1;
+    Character character(MAX_LIVES, 300);
     populateLevel(level , character, window,  levelIndex);
     
+    //For the home/game over screen
+    Sprite spriteGameOver;
+    Texture textureGameOver = TextureHolder::GetTexture("../Resources/Images/greywall.jpg");
+    spriteGameOver.setTexture(textureGameOver);
+    spriteGameOver.setPosition(0, 0);
+    //Image is 1920x1080 - needs scaling for large displays
+    spriteGameOver.setScale(resolution.x/1920, resolution.y/1080);
+    View hudView(FloatRect (0,0,resolution.x,resolution.y));
+    Font font;
+    font.loadFromFile("../Resources/Fonts/sansation.ttf");
+    
+    Text pausedText;
+    pausedText.setFont(font);
+    pausedText.setCharacterSize(155);
+    pausedText.setFillColor(Color::White);
+    pausedText.setString("Press Enter \nto continue");
+    
+    FloatRect pausedRect = pausedText.getLocalBounds();
+    pausedText.setOrigin(pausedRect.left+pausedRect.width/2.0f, pausedRect.top+pausedRect.height/2.0f);
+    pausedText.setPosition(resolution.x/2, resolution.y/2);
+    
+    // Score
+    Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(55);
+    scoreText.setFillColor(Color::White);
+    scoreText.setPosition(resolution.x*.02, resolution.y*.02);
+    scoreText.setString("Score: 0");
+    
+    // Score
+    Text liveText;
+    liveText.setFont(font);
+    liveText.setCharacterSize(55);
+    liveText.setFillColor(Color::White);
+    liveText.setPosition(resolution.x*.87, resolution.y*.02);
+    liveText.setString("Lives: 3");
+    
+    //Background
+    Sprite background(TextureHolder::GetTexture("../Resources/Images/greywall.jpg"));
+    background.setPosition(0, 0);
+    background.setScale(resolution.x/1200, resolution.y/800);
+    
+    int scoreFromPrevLevels = 0;
     
     bool paused = false;
+    int framesSinceLastHUDUpdate = 0;
     
+    int fpsMeasurementFrameInterval = 10;
     while (window.isOpen())
     {
         
@@ -70,14 +115,18 @@ int main(int, char const**)
             if(intersectingBlock != nullptr ){
                 if(intersectingBlock->m_LevelExit){
                     cout<<"Loading next level!!\n";
+                    scoreFromPrevLevels += character.getCoinCount();
+                    character.resetScore();
                     delete level;
                     populateLevel(level, character, window, ++levelIndex);
                 }else if(intersectingBlock->m_isHazard){
-                    cout<<lives<<" Lives remaining\n";
+                    character.removeLife();
+                    character.resetScore();
+                    cout<<character.getLives()<<" Lives remaining\n";
                     populateLevel(level, character, window, levelIndex);
                 }else if(intersectingBlock->isCoin()){
                     character.addCoin();
-                    cout<<character.getCoinCount()<<" coins collected\n";
+                    cout<<character.getCoinCount()+scoreFromPrevLevels<<" coins collected\n";
                     intersectingBlock->remove();
                 }
             }
@@ -104,14 +153,30 @@ int main(int, char const**)
                 Vector2f interpolatedPos = mainView.getCenter() + (position - mainView.getCenter())*INTERPOLATION_SPEED;
                 mainView.setCenter(interpolatedPos);
             }
+            
+            framesSinceLastHUDUpdate++;
+            
+            //HUD Updates
+            if(framesSinceLastHUDUpdate > fpsMeasurementFrameInterval){
+                std::stringstream ssLives;
+                std::stringstream ssScore;
+                
+                ssLives << "Lives: " << character.getLives();
+                liveText.setString(ssLives.str());
+                ssScore << "Score: " << character.getCoinCount()+scoreFromPrevLevels;
+                scoreText.setString(ssScore.str());
+                framesSinceLastHUDUpdate = 0;
+            }
         }
         //Temp death condition
-        if(lives <= 0) return 0;
+        if(character.getLives() <= 0){
+            return 0;
+        }
         
         
 
         //Draw Sprites
-        window.clear();
+        window.draw(background);
     
         window.setView(mainView);
         window.draw(character.getSprite());
@@ -120,11 +185,13 @@ int main(int, char const**)
             for(int y = 0 ; y< blocks.at(x).size();++y){
                 //if(blocks->at(x).at(y).m_MoveDirection==0)
                 blocks.at(x).at(y)->update();
-                
                 window.draw((blocks.at(x)).at(y)->getSprite());
             }
         }
-
+        //HUD ELEMENTS
+        window.setView(hudView);
+        window.draw(scoreText);
+        window.draw(liveText);
         // Update the window
         window.display();
         
@@ -137,33 +204,54 @@ int main(int, char const**)
 
 void populateLevel(Level*& level,Character& character, RenderWindow& window, int levelNumber){
     
+    // Initialize stringstream object with file path for level data file
     std::stringstream ss;
     ss<<"../Resources/Levels/level"<<levelNumber<<".txt";
+
+    // Seed random number generator with current time
     srand((int) time(0));
 
+    // Read level data from file and store in 2D vector of integers
     vector<vector<int>> levelData = retrieveLevelData(ss.str());
-    //*texture = TextureHolder::GetTexture("../Resources/Images/Block.png");
+
+    // Initialize 2D vector of Block pointers
     vector<vector<Block*>> map;
-    for(int x =	 0 ; x<levelData.size() ;x+=1){
+
+    // Iterate over level data vector
+    for(int x =     0 ; x<levelData.size() ;x+=1){
+        // Initialize new row in map vector
         map.push_back(vector<Block*>());
+
+        // Iterate over row in level data vector
         for(int y = 0; y< levelData[x].size() ; y+=1){
+            // Generate random index between 1 and 3
             int index = (rand()%3) + 1;
+
+            // Determine type of block to create based on value in level data vector
             if(levelData[x][y] == 0 || levelData[x][y] == 9){
+                // Create new Block with default texture and collides flag set to false
                 Block* block = new Block(TextureHolder::GetTexture(""),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false);
+                // Add Block to map vector
                 map[x].push_back(block);
+
+                // If value in level data vector is 9, set character's spawn position
                 if(levelData[x][y] == 9)
                     character.spawn(Vector2i(x*BLOCK_WIDTH,y*BLOCK_WIDTH),BLOCK_WIDTH);
-                
-            }else if(levelData[x][y] == 2){
+            }
+            // Create new temporary Block with different texture and collides flag set to true
+            else if(levelData[x][y] == 2){
                 Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/redBlock1.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),true,1);
                 map[x].push_back(block);
             }
+            // Create new Block with different texture, exit flag set to true, and collides flag set to false
             else if(levelData[x][y] == 3){
                 Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/levelExit.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,true);
                 map[x].push_back(block);
             }
             else if(levelData[x][y] == 4){
-                Block* block = new Block(TextureHolder::GetTexture("../Resources/Images/spikes.png"),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,false,true);
+                stringstream ss;
+                ss << "../Resources/Images/spikes"<<index<<".png";
+                Block* block = new Block(TextureHolder::GetTexture(ss.str()),FloatRect(x*BLOCK_WIDTH,y*BLOCK_WIDTH,BLOCK_WIDTH,BLOCK_WIDTH),false,-1,false,true);
                 map[x].push_back(block);
             }
             else if(levelData[x][y] == 5){

@@ -31,7 +31,8 @@ private:
 public:
     Character(int lives, int speed);
     void spawn(Vector2i spawnLocation,  int tileSize);
-    void resetCharacterStats();
+    void resetScore();
+    void resetLives();
     FloatRect getPosition();
     Vector2f getCenter();
     float getRotation();
@@ -41,7 +42,8 @@ public:
     void jump(float power, bool isGrounded);
     void update(float elapsedTime, bool groundContact);
     void addCoin();
-    int getCoinCount();
+    void removeLife();
+    int getCoinCount(), getLives();
     
 };
 

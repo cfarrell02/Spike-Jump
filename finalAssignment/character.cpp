@@ -29,8 +29,10 @@ void Character::spawn(Vector2i spawnLocation,  int tileSize){
 //        m_Resolution.y = resolution.y;
     }
 
-void Character::resetCharacterStats(){
+void Character::resetLives(){
     m_Lives = MAX_LIVES;
+}
+void Character::resetScore(){
     m_Coins = 0;
 }
 
@@ -41,8 +43,13 @@ void Character::addCoin(){
 int Character::getCoinCount(){
     return m_Coins;
 }
+int Character::getLives(){
+    return m_Lives;
+}
 
-
+void Character::removeLife(){
+    m_Lives--;
+}
 
 FloatRect Character::getPosition(){
     return m_Sprite.getGlobalBounds();
