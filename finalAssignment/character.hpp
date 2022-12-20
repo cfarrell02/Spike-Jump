@@ -27,7 +27,7 @@ private:
     Time m_LastHit;
     float m_JumpCoolDown = .1;
     float m_Speed, m_VerticalVelocity = 0;
-    const int GRAVITY = 6, MAX_LIVES;
+    const int GRAVITY = 15, MAX_LIVES;
 public:
     Character(int lives, int speed);
     void spawn(Vector2i spawnLocation,  int tileSize);
@@ -40,7 +40,7 @@ public:
     void moveLeft(), moveRight();
     void stopLeft(), stopRight();
     void jump(float power, bool isGrounded);
-    void update(float elapsedTime, bool groundContact);
+    void update(float elapsedTime, bool groundContact, bool canMoveUp);
     void addCoin();
     void removeLife();
     int getCoinCount(), getLives();

@@ -29,6 +29,7 @@ public:
     vector<vector<Block*>> getBlocks();
     Block* getIntersectingBlock(FloatRect object);
     Block* getIntersectingBlockBelow(FloatRect object);
+    Block* getIntersectingBlockAbove(FloatRect object);
     bool canMoveRight(FloatRect object), canMoveLeft(FloatRect object);
 };
 

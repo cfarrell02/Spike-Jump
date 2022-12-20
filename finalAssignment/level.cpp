@@ -58,6 +58,34 @@ Block* Level::getIntersectingBlockBelow(FloatRect object)
     return nullptr;
 }
 
+Block* Level::getIntersectingBlockAbove(FloatRect object)
+{
+    // Calculate the coordinates of the nearest block to the rectangle
+    int blockX = std::round(object.left / 64);
+    int blockY = std::round(object.top / 64);
+
+    // Check if the block is within the bounds of the map
+    if (blockX >= 0 && blockX < m_Map.size() && blockY-1 >= 0 && blockY-1 < m_Map.at(blockX).size())
+    {
+        Block* nearestBlock = m_Map.at(blockX).at(blockY-1);
+
+        // Check if the rectangle is intersecting with the block's Position
+        if (nearestBlock->getPosition().intersects(object))
+        {
+            // Check if the block is walkable
+            if(nearestBlock->isWalkable()){
+                // Return the block if it is walkable and intersecting with the rectangle
+                // nearestBlock->startCountdown();
+                return nearestBlock;
+            }
+            
+        }
+    }
+
+    // Return nullptr if the block is not within the bounds of the map or if the rectangle is not intersecting with the block
+    return nullptr;
+}
+
 Block* Level::getIntersectingBlock(FloatRect object)
 {
     // Calculate the coordinates of the nearest block to the rectangle

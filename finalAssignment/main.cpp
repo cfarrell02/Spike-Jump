@@ -30,10 +30,8 @@ int main(int, char const**)
     RenderWindow window(VideoMode(resolution.x,resolution.y),"Test Game");
     View mainView(sf::FloatRect(0,0,resolution.x,resolution.y));
     Level* level;
-    // Start the game loop
-
     
-
+    // Start the game loop
     Clock clock;
     Vector2f mouseWorldPosition;
     Vector2i mouseScreenPosition;
@@ -42,13 +40,8 @@ int main(int, char const**)
     Character character(MAX_LIVES, 300);
     populateLevel(level , character, window,  levelIndex);
     
+    
     //For the home/game over screen
-    Sprite spriteGameOver;
-    Texture textureGameOver = TextureHolder::GetTexture("../Resources/Images/greywall.jpg");
-    spriteGameOver.setTexture(textureGameOver);
-    spriteGameOver.setPosition(0, 0);
-    //Image is 1920x1080 - needs scaling for large displays
-    spriteGameOver.setScale(resolution.x/1920, resolution.y/1080);
     View hudView(FloatRect (0,0,resolution.x,resolution.y));
     Font font;
     font.loadFromFile("../Resources/Fonts/sansation.ttf");
@@ -58,38 +51,47 @@ int main(int, char const**)
     pausedText.setCharacterSize(155);
     pausedText.setFillColor(Color::White);
     pausedText.setString("Press Enter \nto continue");
-    
     FloatRect pausedRect = pausedText.getLocalBounds();
     pausedText.setOrigin(pausedRect.left+pausedRect.width/2.0f, pausedRect.top+pausedRect.height/2.0f);
     pausedText.setPosition(resolution.x/2, resolution.y/2);
     
+    Text deathText;
+    deathText.setFont(font);
+    deathText.setCharacterSize(155);
+    deathText.setFillColor(Color::Red);
+    deathText.setString("You Died");
+    FloatRect deathRect = deathText.getLocalBounds();
+    deathText.setOrigin(deathRect.left+deathRect.width/2.0f, deathRect.top+deathRect.height/2.0f);
+    deathText.setPosition(resolution.x/2, resolution.y/2);
     // Score
     Text scoreText;
     scoreText.setFont(font);
     scoreText.setCharacterSize(55);
     scoreText.setFillColor(Color::White);
     scoreText.setPosition(resolution.x*.02, resolution.y*.02);
-    scoreText.setString("Score: 0");
+    scoreText.setString("Score: ");
     
-    // Score
+    // Lives
     Text liveText;
     liveText.setFont(font);
     liveText.setCharacterSize(55);
     liveText.setFillColor(Color::White);
     liveText.setPosition(resolution.x*.87, resolution.y*.02);
-    liveText.setString("Lives: 3");
+    liveText.setString("Lives: ");
     
     //Background
     Sprite background(TextureHolder::GetTexture("../Resources/Images/greywall.jpg"));
     background.setPosition(0, 0);
     background.setScale(resolution.x/1200, resolution.y/800);
     
+    
     int scoreFromPrevLevels = 0;
     
-    bool paused = false;
+    bool paused = true, dead = false;
     int framesSinceLastHUDUpdate = 0;
     
     int fpsMeasurementFrameInterval = 10;
+    
     while (window.isOpen())
     {
         
@@ -102,96 +104,127 @@ int main(int, char const**)
                 window.close();
             }
 
-            // Escape pressed: exit
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                window.close();
+            // Escape pressed: pause
+            if(event.type == sf::Event::KeyPressed){
+                if(!dead){
+                    if (event.key.code == sf::Keyboard::Escape) {
+                        paused = !paused; // Toggle pause bool
+                    }
+                    else if(event.key.code == sf::Keyboard::Enter){
+                        paused = false; //Enter unpauses
+                    }
+                }else{
+                    if(event.key.code == sf::Keyboard::Enter){ // Reset everything
+                        paused = false;
+                        dead = false;
+                        character.resetLives();
+                        character.resetScore();
+                    }
+                }
+                
             }
         }
 
         if(!paused){
-            Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition());
-            bool touchingGround = touchingBlock != nullptr;
-            Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
-            if(intersectingBlock != nullptr ){
-                if(intersectingBlock->m_LevelExit){
-                    cout<<"Loading next level!!\n";
-                    scoreFromPrevLevels += character.getCoinCount();
-                    character.resetScore();
-                    delete level;
-                    populateLevel(level, character, window, ++levelIndex);
-                }else if(intersectingBlock->m_isHazard){
-                    character.removeLife();
-                    character.resetScore();
-                    cout<<character.getLives()<<" Lives remaining\n";
-                    populateLevel(level, character, window, levelIndex);
-                }else if(intersectingBlock->isCoin()){
-                    character.addCoin();
-                    cout<<character.getCoinCount()+scoreFromPrevLevels<<" coins collected\n";
-                    intersectingBlock->remove();
+            if(!dead){
+                Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition());
+                bool touchingGround = touchingBlock != nullptr;
+                Block* blockAbove = level->getIntersectingBlockAbove(character.getPosition());
+                bool canMoveUp = blockAbove == nullptr;
+                Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
+                if(intersectingBlock != nullptr ){
+                    if(intersectingBlock->m_LevelExit){
+                        cout<<"Loading next level!!\n";
+                        scoreFromPrevLevels += character.getCoinCount();
+                        character.resetScore();
+                        delete level;
+                        populateLevel(level, character, window, ++levelIndex);
+                        mainView.setCenter(character.getPosition().left, character.getPosition().top);
+                    }else if(intersectingBlock->m_isHazard){
+                        character.removeLife();
+                        character.resetScore();
+                        cout<<character.getLives()<<" Lives remaining\n";
+                        populateLevel(level, character, window, levelIndex);
+                    }else if(intersectingBlock->isCoin()){
+                        character.addCoin();
+                        cout<<character.getCoinCount()+scoreFromPrevLevels<<" coins collected\n";
+                        intersectingBlock->remove();
+                    }
+                }
+                Time dt = clock.restart();
+                gameTimeTotal += dt;
+                float dtAsSeconds = dt.asSeconds();
+                
+                //character Movement
+                if(Keyboard::isKeyPressed(Keyboard::A) && level->canMoveLeft(character.getPosition()))
+                    character.moveLeft();
+                else character.stopLeft();
+                if(Keyboard::isKeyPressed(Keyboard::D) && level->canMoveRight(character.getPosition()))
+                    character.moveRight();
+                else character.stopRight();
+                
+                if(Keyboard::isKeyPressed(Keyboard::Space))
+                    character.jump(300 * dtAsSeconds, touchingGround);
+                character.update(dtAsSeconds, touchingGround, canMoveUp);
+                //camera movement
+                Vector2f position(character.getPosition().left,character.getPosition().top) ;
+                if(std::abs(mainView.getCenter().x - position.x) > CAMERA_DEADZONE ||
+                   std::abs(mainView.getCenter().y - position.y) > CAMERA_DEADZONE){
+                    Vector2f interpolatedPos = mainView.getCenter() + (position - mainView.getCenter())*INTERPOLATION_SPEED;
+                    mainView.setCenter(interpolatedPos);
+                }
+                
+                framesSinceLastHUDUpdate++;
+                
+                //HUD Updates
+                if(framesSinceLastHUDUpdate > fpsMeasurementFrameInterval){
+                    std::stringstream ssLives;
+                    std::stringstream ssScore;
+                    
+                    ssLives << "Lives: " << character.getLives();
+                    liveText.setString(ssLives.str());
+                    ssScore << "Score: " << character.getCoinCount()+scoreFromPrevLevels;
+                    scoreText.setString(ssScore.str());
+                    framesSinceLastHUDUpdate = 0;
+                    //Temp death condition
+                    if(character.getLives() <= 0){
+                        dead = true;
+                    }
                 }
             }
-            Time dt = clock.restart();
-            gameTimeTotal += dt;
-            float dtAsSeconds = dt.asSeconds();
-            
-            mouseScreenPosition = Mouse::getPosition(window);
-            //character Movement
-            if(Keyboard::isKeyPressed(Keyboard::A) && level->canMoveLeft(character.getPosition()))
-                character.moveLeft();
-            else character.stopLeft();
-            if(Keyboard::isKeyPressed(Keyboard::D) && level->canMoveRight(character.getPosition()))
-                character.moveRight();
-            else character.stopRight();
-            
-            if(Keyboard::isKeyPressed(Keyboard::Space))
-                character.jump(6, touchingGround);
-            character.update(dtAsSeconds, touchingGround);
-            //camera movement
-            Vector2f position(character.getPosition().left,character.getPosition().top) ;
-            if(std::abs(mainView.getCenter().x - position.x) > CAMERA_DEADZONE ||
-               std::abs(mainView.getCenter().y - position.y) > CAMERA_DEADZONE){
-                Vector2f interpolatedPos = mainView.getCenter() + (position - mainView.getCenter())*INTERPOLATION_SPEED;
-                mainView.setCenter(interpolatedPos);
-            }
-            
-            framesSinceLastHUDUpdate++;
-            
-            //HUD Updates
-            if(framesSinceLastHUDUpdate > fpsMeasurementFrameInterval){
-                std::stringstream ssLives;
-                std::stringstream ssScore;
+            else{ // Dead
                 
-                ssLives << "Lives: " << character.getLives();
-                liveText.setString(ssLives.str());
-                ssScore << "Score: " << character.getCoinCount()+scoreFromPrevLevels;
-                scoreText.setString(ssScore.str());
-                framesSinceLastHUDUpdate = 0;
             }
         }
-        //Temp death condition
-        if(character.getLives() <= 0){
-            return 0;
-        }
-        
-        
 
+        
         //Draw Sprites
-        window.draw(background);
-    
-        window.setView(mainView);
-        window.draw(character.getSprite());
-        vector<vector<Block*>> blocks = level ->getBlocks();
-        for(int x = 0; x< blocks.size();++x){
-            for(int y = 0 ; y< blocks.at(x).size();++y){
-                //if(blocks->at(x).at(y).m_MoveDirection==0)
-                blocks.at(x).at(y)->update();
-                window.draw((blocks.at(x)).at(y)->getSprite());
+        
+        if(!paused){
+            if(!dead){
+                window.draw(background);
+                window.setView(mainView);
+                window.draw(character.getSprite());
+                vector<vector<Block*>> blocks = level ->getBlocks();
+                for(int x = 0; x< blocks.size();++x){
+                    for(int y = 0 ; y< blocks.at(x).size();++y){
+                        //if(blocks->at(x).at(y).m_MoveDirection==0)
+                        blocks.at(x).at(y)->update();
+                        window.draw((blocks.at(x)).at(y)->getSprite());
+                    }
+                }
+                //HUD ELEMENTS
+                window.setView(hudView);
+                window.draw(scoreText);
+                window.draw(liveText);
+            }else{ // dead
+                window.clear();
+                window.draw(deathText);
             }
+        }else{ // paused
+            window.draw(background);
+            window.draw(pausedText);
         }
-        //HUD ELEMENTS
-        window.setView(hudView);
-        window.draw(scoreText);
-        window.draw(liveText);
         // Update the window
         window.display();
         
@@ -218,11 +251,13 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
     vector<vector<Block*>> map;
 
     // Iterate over level data vector
-    for(int x =     0 ; x<levelData.size() ;x+=1){
+    for(int x = 0 ; x<levelData.size() ;x+=1){
         // Initialize new row in map vector
         map.push_back(vector<Block*>());
-
+        
         // Iterate over row in level data vector
+        
+        //0 - Blankspace, 1 - Greyblock, 2 - Redblock (temporary), 3 - Level exit, 4 - spike, 5 - coin, 9- playerspawn
         for(int y = 0; y< levelData[x].size() ; y+=1){
             // Generate random index between 1 and 3
             int index = (rand()%3) + 1;

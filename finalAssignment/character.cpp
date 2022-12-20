@@ -82,7 +82,7 @@ void Character::stopRight(){
 
 
 
-void Character::update(float elapsedTime, bool groundContact){
+void Character::update(float elapsedTime, bool groundContact, bool canMoveUp){
 //    std::cout<<clock.getElapsedTime().asSeconds()<<std::endl;
     float change = m_Speed*elapsedTime;
     if(m_RightPressed){
@@ -97,6 +97,9 @@ void Character::update(float elapsedTime, bool groundContact){
     if(!groundContact){
         m_VerticalVelocity += GRAVITY * elapsedTime;
     }else if(m_VerticalVelocity>0){
+        m_VerticalVelocity = 0;
+    }
+    if(!canMoveUp && m_VerticalVelocity <0){
         m_VerticalVelocity = 0;
     }
     m_Position.y += m_VerticalVelocity; 
