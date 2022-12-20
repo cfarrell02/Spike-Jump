@@ -37,6 +37,7 @@ int main(int, char const**)
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
     int levelIndex = 1;
+    const int finalLevelIndex = 4;
     Character character(MAX_LIVES, 300);
     populateLevel(level , character, window,  levelIndex);
     
@@ -133,13 +134,18 @@ int main(int, char const**)
                 bool canMoveUp = blockAbove == nullptr;
                 Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
                 if(intersectingBlock != nullptr ){
-                    if(intersectingBlock->m_LevelExit){
-                        cout<<"Loading next level!!\n";
-                        scoreFromPrevLevels += character.getCoinCount();
-                        character.resetScore();
-                        delete level;
-                        populateLevel(level, character, window, ++levelIndex);
-                        mainView.setCenter(character.getPosition().left, character.getPosition().top);
+                    if( intersectingBlock->m_LevelExit){
+                        if(finalLevelIndex == levelIndex){
+                            //End game stuff here
+                            cout<<"Game over!!\n";
+                        }else{
+                            cout<<"Loading next level!!\n";
+                            scoreFromPrevLevels += character.getCoinCount();
+                            character.resetScore();
+                            delete level;
+                            populateLevel(level, character, window, ++levelIndex);
+                            mainView.setCenter(character.getPosition().left, character.getPosition().top);
+                        }
                     }else if(intersectingBlock->m_isHazard){
                         character.removeLife();
                         character.resetScore();
