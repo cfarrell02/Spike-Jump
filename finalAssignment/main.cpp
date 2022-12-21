@@ -27,7 +27,7 @@ int main(int, char const**)
     resolution.x = VideoMode::getDesktopMode().width/2;
     resolution.y = VideoMode::getDesktopMode().height/2;
     
-    RenderWindow window(VideoMode(resolution.x,resolution.y),"Test Game");
+    RenderWindow window(VideoMode(resolution.x,resolution.y),"Spike Jump");
     View mainView(sf::FloatRect(0,0,resolution.x,resolution.y));
     Level* level;
     
