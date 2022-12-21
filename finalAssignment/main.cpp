@@ -36,8 +36,8 @@ int main(int, char const**)
     Vector2f mouseWorldPosition;
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
-    int levelIndex = 1;
-    const int finalLevelIndex = 4;
+    int levelIndex = 4;
+    const int finalLevelIndex = 5;
     Character character(MAX_LIVES, 300);
     populateLevel(level , character, window,  levelIndex);
     
@@ -85,10 +85,22 @@ int main(int, char const**)
     background.setPosition(0, 0);
     background.setScale(resolution.x/1200, resolution.y/800);
     
+    //SFX
+    SoundBuffer jumpBuffer, coinBuffer, deathBuffer;
+    jumpBuffer.loadFromFile("../Resources/Sounds/jump.wav");
+    coinBuffer.loadFromFile("../Resources/Sounds/coinCollect.wav");
+    deathBuffer.loadFromFile("../Resources/Sounds/death.wav");
+    Sound jumpSound, deathSound, coinSound;
+    jumpSound.setBuffer(jumpBuffer);
+    deathSound.setBuffer(deathBuffer);
+    coinSound.setBuffer(coinBuffer);
+    
+    
+    
     
     int scoreFromPrevLevels = 0;
     
-    bool paused = true, dead = false;
+    bool paused = true, dead = false, spacePressed = false;
     int framesSinceLastHUDUpdate = 0;
     
     int fpsMeasurementFrameInterval = 10;
@@ -123,6 +135,7 @@ int main(int, char const**)
                     }
                 }
                 
+                
             }
         }
 
@@ -149,10 +162,12 @@ int main(int, char const**)
                     }else if(intersectingBlock->m_isHazard){
                         character.removeLife();
                         character.resetScore();
+                        deathSound.play();
                         cout<<character.getLives()<<" Lives remaining\n";
                         populateLevel(level, character, window, levelIndex);
                     }else if(intersectingBlock->isCoin()){
                         character.addCoin();
+                        coinSound.play();
                         cout<<character.getCoinCount()+scoreFromPrevLevels<<" coins collected\n";
                         intersectingBlock->remove();
                     }
@@ -169,8 +184,12 @@ int main(int, char const**)
                     character.moveRight();
                 else character.stopRight();
                 
-                if(Keyboard::isKeyPressed(Keyboard::Space))
-                    character.jump(300 * dtAsSeconds, touchingGround);
+                if(Keyboard::isKeyPressed(Keyboard::Space) && !spacePressed){
+                    jumpSound.play();
+                    character.jump(300*dtAsSeconds, touchingGround);
+                    spacePressed = true;
+                }
+                if(!Keyboard::isKeyPressed(Keyboard::Space)) spacePressed = false;
                 character.update(dtAsSeconds, touchingGround, canMoveUp);
                 //camera movement
                 Vector2f position(character.getPosition().left,character.getPosition().top) ;
@@ -249,9 +268,10 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
 
     // Seed random number generator with current time
     srand((int) time(0));
-
     // Read level data from file and store in 2D vector of integers
     vector<vector<int>> levelData = retrieveLevelData(ss.str());
+    
+    
 
     // Initialize 2D vector of Block pointers
     vector<vector<Block*>> map;
@@ -313,9 +333,10 @@ void populateLevel(Level*& level,Character& character, RenderWindow& window, int
 }
 
 vector<vector<int>> retrieveLevelData(string filePath) {
-  std::ifstream myfile (filePath);
+    std::ifstream myfile (filePath);
   vector<vector<int>> result;
   std::string myline;
+    
 
   if ( myfile.is_open() ) {
     // Read the first line of the file
