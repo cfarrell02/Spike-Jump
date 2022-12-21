@@ -25,9 +25,7 @@ void Character::spawn(Vector2i spawnLocation,  int tileSize){
     
     m_TileSize = tileSize;
         
-//        m_Resolution.x = resolution.x;
-//        m_Resolution.y = resolution.y;
-    }
+}
 
 void Character::resetLives(){
     m_Lives = MAX_LIVES;

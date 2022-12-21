@@ -36,7 +36,7 @@ int main(int, char const**)
     Vector2f mouseWorldPosition;
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
-    int levelIndex = 4;
+    int levelIndex = 1;
     const int finalLevelIndex = 4;
     Character character(MAX_LIVES, 300);
     populateLevel(level , character, window,  levelIndex);
@@ -95,14 +95,18 @@ int main(int, char const**)
     background.setScale(resolution.x/1200, resolution.y/800);
     
     //SFX
-    SoundBuffer jumpBuffer, coinBuffer, deathBuffer;
+    SoundBuffer jumpBuffer, coinBuffer, deathBuffer, musicBuffer;
     jumpBuffer.loadFromFile("../Resources/Sounds/jump.wav");
     coinBuffer.loadFromFile("../Resources/Sounds/coinCollect.wav");
     deathBuffer.loadFromFile("../Resources/Sounds/death.wav");
-    Sound jumpSound, deathSound, coinSound;
+    musicBuffer.loadFromFile("../Resources/Sounds/music.wav");
+    Sound jumpSound, deathSound, coinSound, musicSound;
     jumpSound.setBuffer(jumpBuffer);
     deathSound.setBuffer(deathBuffer);
     coinSound.setBuffer(coinBuffer);
+    musicSound.setBuffer(musicBuffer);
+    musicSound.setLoop(true);
+    musicSound.play();
     
     
     
@@ -151,12 +155,14 @@ int main(int, char const**)
         }
 
         if(!paused && !dead  && !gameOver){
-                Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition());
-                bool touchingGround = touchingBlock != nullptr;
+            //If playing :
+                Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition()); // Block that is being stood on
+                bool touchingGround = touchingBlock != nullptr; // is not falling?
                 Block* blockAbove = level->getIntersectingBlockAbove(character.getPosition());
                 bool canMoveUp = blockAbove == nullptr;
                 Block* intersectingBlock = level->getIntersectingBlock(character.getPosition());
                 if(intersectingBlock != nullptr ){
+                    //Handling interactions with items.
                     if( intersectingBlock->m_LevelExit){
                         if(finalLevelIndex == levelIndex){
                             //End game stuff here
@@ -197,6 +203,7 @@ int main(int, char const**)
                 else character.stopRight();
                 
                 if(Keyboard::isKeyPressed(Keyboard::Space) && !spacePressed){
+                    //Handles jump
                     if(touchingGround)
                     jumpSound.play();
                     character.jump(300*dtAsSeconds, touchingGround);
