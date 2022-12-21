@@ -37,7 +37,7 @@ int main(int, char const**)
     Vector2i mouseScreenPosition;
     Time gameTimeTotal;
     int levelIndex = 4;
-    const int finalLevelIndex = 5;
+    const int finalLevelIndex = 4;
     Character character(MAX_LIVES, 300);
     populateLevel(level , character, window,  levelIndex);
     
@@ -64,6 +64,15 @@ int main(int, char const**)
     FloatRect deathRect = deathText.getLocalBounds();
     deathText.setOrigin(deathRect.left+deathRect.width/2.0f, deathRect.top+deathRect.height/2.0f);
     deathText.setPosition(resolution.x/2, resolution.y/2);
+    
+    Text gameOverText;
+    gameOverText.setFont(font);
+    gameOverText.setCharacterSize(155);
+    gameOverText.setFillColor(Color::White);
+    gameOverText.setString("Game Over!\nPress enter to exit!");
+    FloatRect gameOverRect = gameOverText.getLocalBounds();
+    gameOverText.setOrigin(gameOverRect.left+gameOverRect.width/2.0f, gameOverRect.top+gameOverRect.height/2.0f);
+    gameOverText.setPosition(resolution.x/2, resolution.y/2);
     // Score
     Text scoreText;
     scoreText.setFont(font);
@@ -100,7 +109,7 @@ int main(int, char const**)
     
     int scoreFromPrevLevels = 0;
     
-    bool paused = true, dead = false, spacePressed = false;
+    bool paused = true, dead = false,gameOver = false, spacePressed = false;
     int framesSinceLastHUDUpdate = 0;
     
     int fpsMeasurementFrameInterval = 10;
@@ -134,13 +143,14 @@ int main(int, char const**)
                         character.resetScore();
                     }
                 }
-                
+                if(gameOver && event.key.code == Keyboard::Enter){
+                    return 0;
+                }
                 
             }
         }
 
-        if(!paused){
-            if(!dead){
+        if(!paused && !dead  && !gameOver){
                 Block* touchingBlock = level->getIntersectingBlockBelow(character.getPosition());
                 bool touchingGround = touchingBlock != nullptr;
                 Block* blockAbove = level->getIntersectingBlockAbove(character.getPosition());
@@ -150,7 +160,9 @@ int main(int, char const**)
                     if( intersectingBlock->m_LevelExit){
                         if(finalLevelIndex == levelIndex){
                             //End game stuff here
+                            
                             cout<<"Game over!!\n";
+                            gameOver = true;
                         }else{
                             cout<<"Loading next level!!\n";
                             scoreFromPrevLevels += character.getCoinCount();
@@ -185,6 +197,7 @@ int main(int, char const**)
                 else character.stopRight();
                 
                 if(Keyboard::isKeyPressed(Keyboard::Space) && !spacePressed){
+                    if(touchingGround)
                     jumpSound.play();
                     character.jump(300*dtAsSeconds, touchingGround);
                     spacePressed = true;
@@ -217,31 +230,32 @@ int main(int, char const**)
                     }
                 }
             }
-            else{ // Dead
-                
-            }
-        }
 
         
         //Draw Sprites
         
         if(!paused){
             if(!dead){
-                window.draw(background);
-                window.setView(mainView);
-                window.draw(character.getSprite());
-                vector<vector<Block*>> blocks = level ->getBlocks();
-                for(int x = 0; x< blocks.size();++x){
-                    for(int y = 0 ; y< blocks.at(x).size();++y){
-                        //if(blocks->at(x).at(y).m_MoveDirection==0)
-                        blocks.at(x).at(y)->update();
-                        window.draw((blocks.at(x)).at(y)->getSprite());
+                if(!gameOver){
+                    window.draw(background);
+                    window.setView(mainView);
+                    window.draw(character.getSprite());
+                    vector<vector<Block*>> blocks = level ->getBlocks();
+                    for(int x = 0; x< blocks.size();++x){
+                        for(int y = 0 ; y< blocks.at(x).size();++y){
+                            //if(blocks->at(x).at(y).m_MoveDirection==0)
+                            blocks.at(x).at(y)->update();
+                            window.draw((blocks.at(x)).at(y)->getSprite());
+                        }
                     }
+                    //HUD ELEMENTS
+                    window.setView(hudView);
+                    window.draw(scoreText);
+                    window.draw(liveText);
+                }else{ //gameover
+                    window.draw(background);
+                    window.draw(gameOverText);
                 }
-                //HUD ELEMENTS
-                window.setView(hudView);
-                window.draw(scoreText);
-                window.draw(liveText);
             }else{ // dead
                 window.clear();
                 window.draw(deathText);
