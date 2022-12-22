@@ -60,12 +60,12 @@ bool Block::isCoin()
 // Function to update a block
 void Block::update()
 {
-    // Calculate the regen time as twice the fade timeout
-    int regenTime = m_FadeTimeout * 2;
-    
     // If the fade timeout is greater than 0 and the countdown has not started
     if (m_FadeTimeout > 0 && !m_CountDown)
     {
+        // Calculate the regen time as twice the fade timeout
+        int regenTime = m_FadeTimeout * 2;
+        
         // If the elapsed time is less than or equal to the fade timeout
         if (hitClock.getElapsedTime().asSeconds() <= m_FadeTimeout)
         {

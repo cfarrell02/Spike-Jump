@@ -14,7 +14,7 @@ using namespace sf;
 
 const int BLOCK_WIDTH = 64; // Pixels
 const int CAMERA_DEADZONE = 80;
-const int MAX_LIVES = 3;
+const int MAX_LIVES = 10;
 const float INTERPOLATION_SPEED = .05;
 void populateLevel(Level*& level,Character& character,RenderWindow& window, int levelNumber);
 vector<vector<int>> retrieveLevelData(string filePath);
@@ -73,12 +73,12 @@ int main(int, char const**)
     FloatRect gameOverRect = gameOverText.getLocalBounds();
     gameOverText.setOrigin(gameOverRect.left+gameOverRect.width/2.0f, gameOverRect.top+gameOverRect.height/2.0f);
     gameOverText.setPosition(resolution.x/2, resolution.y/2);
-    // Score
+	    // Score
     Text scoreText;
     scoreText.setFont(font);
     scoreText.setCharacterSize(55);
     scoreText.setFillColor(Color::White);
-    scoreText.setPosition(resolution.x*.02, resolution.y*.02);
+    scoreText.setPosition(5, 5);
     scoreText.setString("Score: ");
     
     // Lives
@@ -86,7 +86,7 @@ int main(int, char const**)
     liveText.setFont(font);
     liveText.setCharacterSize(55);
     liveText.setFillColor(Color::White);
-    liveText.setPosition(resolution.x*.87, resolution.y*.02);
+    liveText.setPosition(resolution.x-215, 5);
     liveText.setString("Lives: ");
     
     //Background
@@ -113,7 +113,7 @@ int main(int, char const**)
     
     int scoreFromPrevLevels = 0;
     
-    bool paused = true, dead = false,gameOver = false, spacePressed = false;
+    bool paused = false, dead = false,gameOver = false, spacePressed = false;
     int framesSinceLastHUDUpdate = 0;
     
     int fpsMeasurementFrameInterval = 10;
@@ -206,7 +206,10 @@ int main(int, char const**)
                     //Handles jump
                     if(touchingGround)
                     jumpSound.play();
-                    character.jump(300*dtAsSeconds, touchingGround);
+                    if(levelIndex!=1)
+                        character.jump(300*dtAsSeconds	, touchingGround);
+                    else
+                        character.jump(10   , touchingGround);  //Issue with jumping due to lag
                     spacePressed = true;
                 }
                 if(!Keyboard::isKeyPressed(Keyboard::Space)) spacePressed = false;

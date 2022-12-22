@@ -28,6 +28,7 @@ sf::Texture& TextureHolder::GetTexture(std::string const& filename){
     }
     else{
         auto& texture = m[filename];
+        cout<<"Fetching new texture\n";
         
         texture.loadFromFile(filename);
         
